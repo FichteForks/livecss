@@ -69,7 +69,10 @@ def get_highlighted_regions(view, last_highlighted_region):
     return regions
 
 
+# dict to hold states
 states = dict()
+
+
 class state_for(object):
     """Store and retrieve state"""
     def __init__(self, view):
@@ -87,6 +90,7 @@ class state_for(object):
                 return True
         elif attr == 'view' or attr.startswith('__'):
             return object.__getattribute__(self, attr)
+
         return getattr(states[self.view.buffer_id()], attr)
 
     def __setattr__(self, attr, value):
