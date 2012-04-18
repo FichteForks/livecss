@@ -17,7 +17,7 @@ from .state import state_for
 from .theme import theme, uncolorized_path
 from .colorizer import colorize_file
 from .menu import create_menu
-from .settings import settings_for, global_settings
+from .settings import settings_for
 
 
 def colorize_on_select_new_theme(view):
@@ -31,6 +31,7 @@ def colorize_on_select_new_theme(view):
 
 
 def generate_menu(view):
+    # TODO: improve this
     s = settings_for(view)
     lstate = s.local.autocolorize
     if s.local.autocolorize == 'undefined':
@@ -55,26 +56,15 @@ def is_colorizable(view):
 
 
 def need_colorization(view):
-    if not is_colorizable(view):
-        return
     s = settings_for(view)
-    if s.glob.autocolorize and s.local.autocolorize in ['undefined', True]:
-        return True
-    if not s.local.autocolorize:
-        return False
-
-
-def need_uncolorization(view):
-    if not is_colorizable(view):
-        return
-    s = settings_for(view)
-    if not s.glob.autocolorize and s.local.autocolorize is 'undefined':
-        return True
-    if s.local.autocolorize:
-        return False
+    # TODO: This setup needs a command to discard local settings
+    if not (s.local.autocolorize is None):
+        return s.local.autocolorize
+    return s.glob.autocolorize and is_colorizable(view)
 
 
 def generate_default_settings():
     if not os.path.exists(os.path.join(sublime.packages_path(), 'User', 'livecss-settings.sublime-settings')):
-        global_settings.colorized_formats = ["source.css", "source.css.less", "source.sass"]
-        global_settings.autocolorize = True
+        s = settings_for(False)
+        s.glob.colorized_formats = ["source.css", "source.css.less", "source.sass"]
+        s.glob.autocolorize = True
