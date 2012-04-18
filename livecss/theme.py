@@ -23,7 +23,7 @@ SUBLIME_PATH = os.path.dirname(PACKAGES_PATH)
 class theme(object):
     """Global object represents ST color scheme """
 
-    _settings_file = 'Base File.sublime-settings'
+    _settings_file = 'Base File.sublime-settings'  # why this file? where is this actually saved?
     _settings = sublime.load_settings(_settings_file)
     prefix = 'Colorized-'
 
@@ -56,7 +56,9 @@ class theme(object):
             cls._settings.add_on_change('color_scheme', callback)
 
 
-def is_colorized(name):
+def is_colorized(name=''):
+    if name == '':
+        name = theme.name
     if name.startswith(theme.prefix):
         return True
 
@@ -74,7 +76,7 @@ def colorized_name(name):
 
 def uncolorized_name(name):
     if is_colorized(name):
-        s = re.search(theme.prefix + "(\d+-)?(?P<Name>.*)", name)
+        s = re.search(theme.prefix + r"(\d+-)?(?P<Name>.*)", name)
         self_name = s.group('Name')
         return self_name
     return name
