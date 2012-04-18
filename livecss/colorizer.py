@@ -32,7 +32,8 @@ def colorize_file(view, state, forse_redraw=False):
     state.colors = colors
     state.regions = colored_regions
 
-    if not state.is_dirty and not forse_redraw:
+    # TODO: rework the state stuff, this is not really straight forward
+    if not (forse_redraw or state.is_dirty):
         return
 
     if forse_redraw or state.need_generate_theme_file:
@@ -40,7 +41,8 @@ def colorize_file(view, state, forse_redraw=False):
         if hasattr(state, 'focused') and state.focused:
             theme.set(colorized_theme_path)
         # remove previously used theme if any
-        rm_theme(state.theme_path)
+        if state.theme_path:
+            rm_theme(state.theme_path)
         # associate theme with file
         state.theme_path = colorized_theme_path
 
@@ -59,7 +61,6 @@ def uncolorize_file(view, state):
 
 
 # extract colors from file
-
 def get_colors(view, color_regions):
     """Extracts text from `color_regions` and wraps it by :attr:`livecss.color.Color` object.
 
