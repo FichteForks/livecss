@@ -28,7 +28,7 @@ def clean_junk():
 
 
 def rm_if_exists(path):
-    """Removes file if it exists"""
+    """Removes path if it exists"""
     if exists(path):
         rm(path)
 
