@@ -66,7 +66,7 @@ class Color(object):
         else:
             if len(color) == 4:
                 # 3 sign hex
-                color = "#{0[1]}{0[1]}{0[2]}{0[2]}{0[3]}{0[3]}".format(color)
+                color = '#' + color[1] * 2 + color[2] * 2 + color[3] * 2
             if color.startswith('0x'):
                 # 0x123456
                 color = '#' + color[2:]
@@ -82,7 +82,7 @@ class Color(object):
     @property
     def opposite(self):
         r, g, b = self._hex_to_rgb(self.undash)
-        brightness = (r + r + b + b + g + g) / 6
+        brightness = (r + b + g) / 3
         if brightness > 130:
             return '#000000'
         else:
@@ -118,5 +118,4 @@ class Color(object):
         return '#%02x%02x%02x' % tuple(x for x in rgb)
 
     def _hex_to_rgb(self, hex):
-        hex_len = len(hex)
-        return tuple(int(hex[i:i + hex_len / 3], 16) for i in range(0, hex_len, hex_len / 3))
+        return tuple(int(hex[i:i + 2], 16) for i in range(0, 6, 2))
