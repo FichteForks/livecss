@@ -13,8 +13,27 @@ import colorsys
 from .colors import named_colors
 
 
-def to_numbers(seq):
+def to_ints(seq):
+    return [int(num) for num in seq]
+
+
+def to_floats(seq):
     return [float(num) for num in seq]
+
+numberdict = {'i': 'int',
+              'f': 'float'}
+
+
+def to_numbers(seq, types):
+    ret = list()
+    for i in seq.keys():
+        op = False
+        if types[i] in numberdict:
+            op = numberdict[types[i]]
+        elif types[i] in numberdict.values():
+            op = types[i]
+        if op:
+            ret.append(eval(op + '(' + seq[i] + ')'))
 
 
 class Color(object):
@@ -30,16 +49,16 @@ class Color(object):
             hex_color = named_colors[color]
         elif color.startswith('rgb'):
             if color.startswith('rgba'):
-                r, g, b, a = to_numbers(color.strip('rgba()').replace('%', '').split(','))
+                r, g, b, a = color.strip('rgba()').split(',')
             else:
-                r, g, b = to_numbers(color.strip('rgb()').replace('%', '').split(','))
+                r, g, b = color.strip('rgb()').split(',')
             hex_color = self._rgb_to_hex((r, g, b))
 
         elif color.startswith('hsl'):
             if color.startswith('hsla'):
-                h, s, l, a = to_numbers(color.strip('hsla()').replace('%', '').split(','))
+                h, s, l, a = to_floats(color.strip('hsla()').replace('%', '').split(','))
             else:
-                h, s, l = to_numbers(color.strip('hsl()').replace('%', '').split(','))
+                h, s, l = to_floats(color.strip('hsl()').replace('%', '').split(','))
 
             h, s, l = (h / 360.0, s / 100.0, l / 100.0)
             hex_color = self._rgb_to_hex([255 * i for i in colorsys.hls_to_rgb(h, l, s)])
@@ -51,7 +70,6 @@ class Color(object):
             if color.startswith('0x'):
                 # 0x123456
                 color = '#' + color[2:]
-                print "Color: " + color
 
             hex_color = color
 
@@ -83,18 +101,21 @@ class Color(object):
         return hash(self.hex)
 
     def _rgb_to_hex(self, rgb):
-        if str(rgb[0])[-1] == '%':
-            # percentage notation
-            r = int(rgb[0].rstrip('%')) * 255 / 100
-            g = int(rgb[1].rstrip('%')) * 255 / 100
-            b = int(rgb[2].rstrip('%')) * 255 / 100
-            return self._rgb_to_hex((r, g, b))
-
         if len(rgb) == 4:
             #rgba
             rgb = rgb[0:3]
 
-        return '#%02x%02x%02x' % tuple(int(x) for x in rgb)
+        if not isinstance(rgb[0], int):
+            if str(rgb[0]).endswith('%'):
+                # percentage notation
+                r = int(rgb[0].rstrip('%')) * 255 / 100
+                g = int(rgb[1].rstrip('%')) * 255 / 100
+                b = int(rgb[2].rstrip('%')) * 255 / 100
+                return self._rgb_to_hex((r, g, b))
+
+            rgb = to_ints(rgb)
+
+        return '#%02x%02x%02x' % tuple(x for x in rgb)
 
     def _hex_to_rgb(self, hex):
         hex_len = len(hex)
