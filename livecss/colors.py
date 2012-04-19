@@ -6,6 +6,8 @@
 
 """
 
+from .helpers import one_of
+
 html4_names_to_hex = {'aqua': '#00ffff',
                       'black': '#000000',
                       'blue': '#0000ff',
@@ -203,15 +205,29 @@ class Colors:
 
 named_colors = Colors(html4_names_to_hex, css3_names_to_hex)
 
-from .helpers import one_of
-
 named = one_of(named_colors.keys())
 
-hex = r'#(?:[0-9a-fA-F]{3}){1,2}'
-rgb = r'(rgb\(\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*\))'
-rgba = r'(rgba\(\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\b\s*,(\s*\b(0.[0-9]|1(.0)?)\b\s*)\))'
-rgb_percent = r'(rgba?\(\s*(\d?\d%|100%)\s*,\s*(\d?\d%|100%)\s*,\s*(\d?\d%|100%)\s*\))'
-rgba_percent = r'(rgba\(\s*(\d?\d%|100%)\s*,\s*(\d?\d%|100%)\s*,\s*(\d?\d%|100%)\s*(,\s*(0.[0-9]|1(.0)?)\s*)?\))'
-hsl = r'(hsl\(\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|3[0-6]0)\b\s*,\s*\b([0-9]|[1-9][0-9]|100)\b%\s*,\s*\b([0-9]|[1-9][0-9]|100)\b%\s*\))'
-hsla = r'(hsla\(\s*\b([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|3[0-6]0)\b\s*,\s*\b([0-9]|[1-9][0-9]|100)\b%\s*,\s*\b([0-9]|[1-9][0-9]|100)\b%\s*,(\s*\b(0.[0-9]|1(.0)?)\b\s*\)))'
-color_regexps = (named, hex, rgb, rgba, rgb_percent, rgba_percent, hsl, hsla)
+# TODO: optimize the patterns (atomic groups, look-ahead/behind ...?)
+patterns = {'float'     : r'[01](\.0+)?|0?\.\d+',
+            'percent'   : r'[1-9]?\d%|100%',
+            'FF_numeric': r'[1-9]?\d|1\d\d|2[0-4]\d|25[0-5]',
+            'hue'       : r'[1-9]?\d|[12]\d\d|3[0-5]\d|360'}
+
+pre_patt = {'alpha'      : r'\s*(%(float)s)\s*',
+            'rgb'        : r'\s*(%(FF_numeric)s)\s*,\s*(%(FF_numeric)s)\s*,\s*(%(FF_numeric)s)\s*',
+            'rgb_percent': r'\s*(%(percent)s)\s*,\s*(%(percent)s)\s*,\s*(%(percent)s)\s*',
+            'hsl'        : r'\s*(%(hue)s)\s*,\s*(%(percent)s),\s*(%(percent)s)'}
+pre_patt['rgb_both'] = r'(?:%(rgb)s|%(rgb_percent)s)' % pre_patt
+
+html = r'#([[:xdigit:]]{3}){1,2}'
+hexx = r'0x([[:xdigit:]]{6})'
+# TODO: Use conditional regexp; figure out wether to support alpha first
+rgb = r'(rgb\(%(rgb_both)s\))'
+rgba = r'(rgba\(%(rgb_both)s,%(alpha)s\))'
+hsl = r'(hsl\(%(hsl)s\))'
+hsla = r'(hsl\(%(hsl)s,%(alpha)s\))'
+
+color_regexps = [named, html, hexx, rgb, rgba, hsl, hsla]
+for i in range(3, len(color_regexps)):
+    # I would've pre-compiled the regexps but sadly view.find_all() only accepts strings
+    color_regexps[i] = color_regexps[i] % pre_patt % patterns

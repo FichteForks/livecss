@@ -48,6 +48,11 @@ class Color(object):
             if len(color) == 4:
                 # 3 sign hex
                 color = "#{0[1]}{0[1]}{0[2]}{0[2]}{0[3]}{0[3]}".format(color)
+            if color.startswith('0x'):
+                # 0x123456
+                color = '#' + color[2:]
+                print "Color: " + color
+
             hex_color = color
 
         return hex_color

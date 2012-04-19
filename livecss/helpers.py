@@ -13,7 +13,7 @@
 
 
 def one_of(seq):
-    "Return regex which mathes one element of seq"
+    "Return regex which matches one element of seq"
     seq = [r'\b%s\b' % el for el in seq]
     return reduce(lambda x, y: str(x) + '|' + str(y), seq)
 
