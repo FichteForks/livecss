@@ -16,7 +16,7 @@ from livecss.file_operations import clean_junk
 from livecss.state import state_for
 from livecss.theme import theme, is_colorized
 from livecss.utils import (need_colorization, generate_default_settings,
-                           generate_menu, colorize_on_select_new_theme)
+                           generate_menu, colorize_on_select_new_theme, is_colorizable)
 from livecss.settings import settings_for
 
 
@@ -39,7 +39,6 @@ class EventManager(sublime_plugin.EventListener):
             uncolorize_file(view, state)
 
     # TODO: this is not triggered when "replacing" content
-    # TODO: DOES NOT WORK AS EXPECTED!!
     def on_modified(self, view):
         state = state_for(view)
         if need_colorization(view):
@@ -47,6 +46,7 @@ class EventManager(sublime_plugin.EventListener):
         elif is_colorized():
             uncolorize_file(view, state)
 
+    # TODO: filter command line and other inputs which, apparently, are views
     def on_activated(self, view):
         generate_menu(view)
 
@@ -79,7 +79,7 @@ class ToggleLocalLiveCssCommand(sublime_plugin.TextCommand):
 
         # retrieve default local state from global setting
         if s.local.autocolorize is None:
-            s.local.autocolorize = s.glob.autocolorize or False
+            s.local.autocolorize = s.glob.autocolorize and is_colorizable(view)
 
         s.local.autocolorize = not s.local.autocolorize
 
