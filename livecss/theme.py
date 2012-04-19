@@ -59,6 +59,8 @@ class theme(object):
 def is_colorized(name=''):
     if name == '':
         name = theme.name
+    else:
+        name = basename(name)
     if name.startswith(theme.prefix):
         return True
 

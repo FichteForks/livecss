@@ -41,7 +41,7 @@ def colorize_file(view, state, forse_redraw=False):
         if hasattr(state, 'focused') and state.focused:
             theme.set(colorized_theme_path)
         # remove previously used theme if any
-        if state.theme_path:
+        if state.theme_path and state.theme_path != "":
             rm_theme(state.theme_path)
         # associate theme with file
         state.theme_path = colorized_theme_path
@@ -58,6 +58,7 @@ def uncolorize_file(view, state):
     theme.set(uncolorized_path(theme.abspath))
     rm_theme(state.theme_path)
     state.theme_path = ""
+    state.saved_colors = None
 
 
 # extract colors from file

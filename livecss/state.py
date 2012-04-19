@@ -6,6 +6,9 @@
 
 """
 
+from .theme import is_colorized
+from os.path import exists
+
 
 class State(object):
     def __init__(self, view):
@@ -21,7 +24,8 @@ class State(object):
 
         # if we don't have previously saved state
         if not self.regions:
-            return
+            print "no regions! lol"
+            return True
 
         highlighted_regions = get_highlighted_regions(self.view, self.count)
 
@@ -31,7 +35,7 @@ class State(object):
         else:
             is_dirty = True
 
-        # check if length of region's changed
+        # check if length of regions changed
         if not is_dirty:
             for reg_pair in zip(self.saved_regions, self.regions):
                 if abs(reg_pair[0].a - reg_pair[0].b) != abs(reg_pair[1].a - reg_pair[1].b):
@@ -46,14 +50,15 @@ class State(object):
         """Indicates if new color definition appeared in current file"""
 
         # check if there are new colors in view
-        if set(self.colors) - set(self.saved_colors):
+        if not self.saved_colors or set(self.colors) - set(self.saved_colors):
             need_generate = True
         else:
             need_generate = False
 
         # save current colors
         self.saved_colors = self.colors
-        return need_generate
+        # check if theme_path is "valid"
+        return need_generate or not is_colorized(self.theme_path) or not exists(self.theme_path)
 
 
 def get_highlighted_regions(view, last_highlighted_region):
