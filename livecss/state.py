@@ -22,20 +22,15 @@ class State(object):
     def is_dirty(self):
         """Indicates if state was changed"""
 
-        # if we don't have previously saved state
-        if not self.regions:
-            print "no regions! lol"
-            return True
-
         highlighted_regions = get_highlighted_regions(self.view, self.count)
 
         # check if regions have changed
-        if highlighted_regions == self.regions:
+        if highlighted_regions == self.regions or (not self.regions and not highlighted_regions):
             is_dirty = False
         else:
             is_dirty = True
 
-        # check if length of regions changed
+        # check if lengths of regions changed
         if not is_dirty:
             for reg_pair in zip(self.saved_regions, self.regions):
                 if abs(reg_pair[0].a - reg_pair[0].b) != abs(reg_pair[1].a - reg_pair[1].b):
@@ -67,7 +62,7 @@ def get_highlighted_regions(view, last_highlighted_region):
     if not last_highlighted_region:
         return
     regions = []
-    for i in range(int(last_highlighted_region)):
+    for i in range(last_highlighted_region):
         region = view.get_regions('css_color_%d' % i)
         if region:
             regions.append(region[0])

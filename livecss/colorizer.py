@@ -26,8 +26,6 @@ def colorize_file(view, state, forse_redraw=False):
 
     colored_regions = get_colored_regions(view)
     colors = get_colors(view, colored_regions)
-    if not colors:
-        return
 
     state.colors = colors
     state.regions = colored_regions
